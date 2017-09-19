@@ -12,7 +12,7 @@ static int HAS_OBSTACLE = 0;
 static int NO_OBSTACLE = 1;
 
 int currentLine = 0;
-int lightThreshold = 47;
+int lightThreshold = 60;
 
 
 void exitStartBlock() {
@@ -21,7 +21,7 @@ void exitStartBlock() {
 	// turn right
 	turnRight(182, degrees, 50);
 	// move forward 2.5 sec at 50%
-	forward(2.5, seconds, 50);
+	forward(3, seconds, 50);
 	// turn left 90 degress
 	turnLeft(182, degrees, 50);
 	forward(2, seconds, 100);
@@ -83,17 +83,21 @@ void straighten() {
 
 	stopAllMotors();
 	forward(200, milliseconds, 100);
+	if (SensorValue(light) <= lightThreshold)
+	{
+		return;
+	}
 	turnLeft(60, degrees, 50);
 	sensorDistanceLeft = SensorValue(sonar);
 	turnRight(120, degrees, 50);
 	sensorDistanceRight = SensorValue(sonar);
 	turnLeft(60, degrees, 50);
 	if (sensorDistanceLeft >= sensorDistanceRight) {
-		turnRight(10, degrees, 50);
+		turnLeft((sensorDistanceLeft - sensorDistanceRight + 1)/2, degrees, 50);
 	}
 	else
 	{
-		turnLeft(10, degrees, 50);
+		turnRight((sensorDistanceRight - sensorDistanceLeft + 1)/2, degrees, 50);
 	}
 }
 
@@ -148,20 +152,23 @@ task main()
 			continue;
 		}
 		// movement
-		forward(20, milliseconds, 50);
+		for (int i = 0; i < 10 && SensorValue(light) > lightThreshold; i++)
+		{
+			forward(10, milliseconds, 100);
+			if (repCount >= 100) {
+				stopAllMotors();
+				straighten();
+				repCount = 0;
+				} else {
+				repCount++;
+			}
+		}
+
 		if (SensorValue(light) <= lightThreshold)
 		{
 			blacklineFlag = HAS_LINE;
 			obstacleFlag = HAS_OBSTACLE;
 			continue;
 		}
-		if (repCount >= 10) {
-			stopAllMotors();
-			straighten();
-			repCount = 0;
-			} else {
-			repCount++;
-		}
-		stopAllMotors();
 	}
 }
