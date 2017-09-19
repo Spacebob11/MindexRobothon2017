@@ -11,7 +11,7 @@ task main()
 {
 	//backward(2, seconds, 25);
 	turnRight(182, degrees, 25);
-	forward(3, seconds, 50);
+	forward(3.5, seconds, 50);
 
 	turnLeft(175, degrees, 25);
 	forward(4, seconds, 100);
